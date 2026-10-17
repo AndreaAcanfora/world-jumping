@@ -43,7 +43,7 @@ const firstSteps: LevelDef = {
     ...r11,
     // Side islands with gems, a short detour from the route.
     { model: 'block-grass-overhang-low', at: add(r11[3]!.at, [3.2, 0.3, 0]) },
-    { model: 'platform', at: add(r11[7]!.at, [-3, 0.6, 0]) },
+    { model: 'block-grass-overhang-low', at: add(r11[7]!.at, [-3, 0.6, 0]) },
     { model: 'block-grass', at: add(r11[10]!.at, [0.6, 1, -0.6]) },
     // Scenery on the islands.
     { model: 'tree', at: add(r11[2]!.at, [0.6, 1, 0.6]) },
@@ -55,7 +55,7 @@ const firstSteps: LevelDef = {
   coins: arcs(r11, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]),
   gems: [
     topCentre({ model: 'block-grass-overhang-low', at: add(r11[3]!.at, [3.2, 0.3, 0]) }, 0.3),
-    topCentre({ model: 'platform', at: add(r11[7]!.at, [-3, 0.6, 0]) }, 0.3),
+    topCentre({ model: 'block-grass-overhang-low', at: add(r11[7]!.at, [-3, 0.6, 0]) }, 0.3),
     topCentre({ model: 'block-grass', at: add(r11[10]!.at, [0.6, 1, -0.6]) }, 0.3),
   ],
   checkpoints: [topCentre(r11[5]!)],
@@ -91,7 +91,7 @@ const movingBridges: LevelDef = {
     ...r12d,
     { model: 'tree', at: add(r12b[1]!.at, [0.6, 1, 0.6]) },
     { model: 'flowers', at: add(r12c[1]!.at, [-0.5, 1, -0.5]) },
-    { model: 'platform', at: add(r12c[0]!.at, [3.2, 1.3, 0]) },
+    { model: 'block-grass-overhang-low', at: add(r12c[0]!.at, [3.2, 1, 0]) },
   ],
   movers: [
     // Across the first gap, towards the player and back.
@@ -105,7 +105,7 @@ const movingBridges: LevelDef = {
   coins: [...arc(r12a[0]!, r12a[1]!), ...arc(r12b[0]!, r12b[1]!, 4, 1.8), ...arc(r12c[0]!, r12c[1]!)],
   gems: [
     add(topCentre(r12b[1]!), [0, 0.3, 0.6]),
-    topCentre({ model: 'platform', at: add(r12c[0]!.at, [3.2, 1.3, 0]) }, 0.3),
+    topCentre({ model: 'block-grass-overhang-low', at: add(r12c[0]!.at, [3.2, 1, 0]) }, 0.3),
     add(elevatorFoot, [0, 5.2, 0]),
   ],
   checkpoints: [topCentre(r12b[1]!)],
@@ -146,10 +146,16 @@ const turboAndJetpack: LevelDef = {
     ...r13,
     { model: 'tree-pine', at: add(r13[3]!.at, [-0.6, 1, 0.6]) },
     { model: 'sign', at: add(r13[1]!.at, [0.7, 1, 0.8]) },
+    { model: 'block-grass-overhang-low', at: add(r13[2]!.at, [3.6, 0.3, 0]) },
+    { model: 'block-grass', at: add(r13[7]!.at, [0.6, 1, -0.6]) },
     { model: 'flowers', at: add(r13[5]!.at, [0.5, 1, 0.5]) },
   ],
   coins: [...arc(r13[1]!, r13[2]!, 5, 0.6), ...arcs(r13, [2, 5, 6])],
-  gems: [add(topCentre(r13[4]!), [0, 1.5, 0]), add(topCentre(r13[2]!), [3.5, 1.2, 0]), add(topCentre(r13[7]!), [0, 3, 0])],
+  gems: [
+    add(topCentre(r13[4]!), [0, 1.5, 0]),
+    topCentre({ model: 'block-grass-overhang-low', at: add(r13[2]!.at, [3.6, 0.3, 0]) }, 0.3),
+    topCentre({ model: 'block-grass', at: add(r13[7]!.at, [0.6, 1, -0.6]) }, 0.3),
+  ],
   checkpoints: [topCentre(r13[3]!)],
   killY: -8,
   hint: {

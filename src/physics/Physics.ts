@@ -68,6 +68,13 @@ export class Physics {
     this.world.step();
   }
 
+  /** Nearest solid along a ray, with its distance. */
+  rayHit(from: THREE.Vector3, dir: THREE.Vector3, max: number, exclude?: RAPIER.Collider): { collider: RAPIER.Collider; distance: number } | null {
+    const ray = new this.R.Ray({ x: from.x, y: from.y, z: from.z }, { x: dir.x, y: dir.y, z: dir.z });
+    const hit = this.world.castRay(ray, max, true, undefined, undefined, exclude);
+    return hit ? { collider: hit.collider, distance: hit.timeOfImpact } : null;
+  }
+
   /** Distance along a ray to the nearest solid, or `max` if nothing is hit. */
   rayDistance(from: THREE.Vector3, dir: THREE.Vector3, max: number, exclude?: RAPIER.Collider): number {
     const ray = new this.R.Ray({ x: from.x, y: from.y, z: from.z }, { x: dir.x, y: dir.y, z: dir.z });

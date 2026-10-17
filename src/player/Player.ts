@@ -75,8 +75,12 @@ export class Player {
     this.state = step.state;
     const events: PlayerEvent[] = [...step.events];
 
-    // Ride the platform we stand on: it already moved this step.
-    const carry = this.ground && this.grounded ? this.ground.delta : ZERO;
+    // Ride the platform under our feet: it already moved this step, so follow it. Found
+    // with a short ray, because standing still produces no contacts to read it from.
+    const probe = this.feet.clone().setY(this.feet.y + 0.1);
+    const below = this.state.vel.y <= 0.5 ? this.physics.rayHit(probe, DOWN, 0.45, this.collider) : null;
+    this.ground = below ? level.mover(below.collider) : undefined;
+    const carry = this.ground ? this.ground.delta : ZERO;
     const desired = {
       x: this.state.vel.x * dt + carry.x,
       y: this.state.vel.y * dt + carry.y,
@@ -86,11 +90,9 @@ export class Player {
     const moved = this.controller.computedMovement();
     this.grounded = this.controller.computedGrounded();
 
-    this.ground = undefined;
     for (let i = 0; i < this.controller.numComputedCollisions(); i++) {
       const c = this.controller.computedCollision(i);
       if (!c) continue;
-      if (c.normal1.y > 0.5) this.ground = level.mover(c.collider) ?? this.ground;
       // Bumped our head: stop rising.
       if (c.normal1.y < -0.5 && this.state.vel.y > 0) this.state.vel.y = 0;
     }

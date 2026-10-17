@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { checkRoute } from '../src/level/reach';
+import { checkGems, checkRoute } from '../src/level/reach';
 import { LEVELS } from '../src/levels';
 
 describe.each(LEVELS.map((l) => [l.id, l] as const))('level %s', (_, level) => {
@@ -12,6 +12,10 @@ describe.each(LEVELS.map((l) => [l.id, l] as const))('level %s', (_, level) => {
     const checks = checkRoute(level);
     expect(checks.length).toBeGreaterThanOrEqual(4);
     expect(checks.reduce((sum, c) => sum + c.rise, 0)).toBeGreaterThan(2);
+  });
+
+  it('lets you collect every gem with normal jumps, without falling', () => {
+    expect(checkGems(level)).toEqual([]);
   });
 
   it('has three gems and medal times in order', () => {

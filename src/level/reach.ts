@@ -113,3 +113,46 @@ export function checkRoute(level: LevelDef): JumpCheck[] {
   }
   return checks;
 }
+
+/** Highest a gem may float above a surface and still be grabbed with a normal jump. */
+export const GEM_REACH = 0.85 * apexHeight() + 0.9;
+
+const NON_SOLID = new Set(['flowers', 'flowers-tall', 'grass', 'mushrooms', 'plant', 'stones']);
+
+/**
+ * Every gem must sit over something solid, close enough to grab with a normal jump, and
+ * that support must be on the route or reachable from it and back with comfortable
+ * jumps: collecting everything never forces a fall or an ability.
+ */
+export function checkGems(level: LevelDef): string[] {
+  const routeTops = [
+    ...level.pieces.filter((p) => p.route !== undefined).map((p) => [topOf(p.model, p.at, p.turns)]),
+    ...(level.movers ?? []).filter((m) => m.route !== undefined).map(moverTops),
+  ];
+  const supports = [
+    ...level.pieces.filter((p) => !NON_SOLID.has(p.model)).map((p) => ({ tops: [topOf(p.model, p.at, p.turns)], route: p.route !== undefined })),
+    ...(level.movers ?? []).map((m) => ({ tops: moverTops(m), route: m.route !== undefined })),
+  ];
+  const comfortable = (a: Top, b: Top) => {
+    const rise = b.y - a.y;
+    return rise <= MAX_RISE * apexHeight() && gapBetween(a, b) <= COMFORT * maxJumpDistance(rise);
+  };
+
+  const problems: string[] = [];
+  (level.gems ?? []).forEach((g, i) => {
+    const under = supports.filter((s) =>
+      s.tops.some((t) => g[0] >= t.minX - 0.3 && g[0] <= t.maxX + 0.3 && g[2] >= t.minZ - 0.3 && g[2] <= t.maxZ + 0.3 && g[1] >= t.y && g[1] - t.y <= GEM_REACH),
+    );
+    if (under.length === 0) {
+      problems.push(`gem ${i + 1} floats with nothing to jump from under it`);
+      return;
+    }
+    const ok = under.some(
+      (s) =>
+        s.route ||
+        s.tops.some((t) => routeTops.some((r) => r.some((rt) => comfortable(rt, t))) && routeTops.some((r) => r.some((rt) => comfortable(t, rt) || (rt.y < t.y && gapBetween(t, rt) <= COMFORT * maxJumpDistance(0))))),
+    );
+    if (!ok) problems.push(`gem ${i + 1} sits on a platform you cannot reach and leave with normal jumps`);
+  });
+  return problems;
+}

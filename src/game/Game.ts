@@ -109,6 +109,16 @@ export class Game {
     return new Game(def, physics, level, player, rig, settings.quality === 'high', renderer, input, hooks);
   }
 
+  /** Test helper (only with ?autopilot or ?debug): put the player somewhere. */
+  teleport(x: number, y: number, z: number): void {
+    this.player.respawn(new THREE.Vector3(x, y, z), this.abilitiesLeft());
+  }
+
+  /** Test helper: where each moving platform is now. */
+  moverPositions(): { x: number; y: number; z: number }[] {
+    return this.level.movers.map((m) => ({ x: m.position.x, y: m.position.y, z: m.position.z }));
+  }
+
   start(): void {
     this.input.enabled = true;
     this.loop.start();

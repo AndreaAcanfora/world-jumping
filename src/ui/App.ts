@@ -312,7 +312,9 @@ export class App {
       pause: () => this.showPause(),
       finish: (r) => this.showResults(r),
     });
-    if (new URLSearchParams(location.search).has('autopilot')) game.autopilot = new Autopilot(def);
+    const params = new URLSearchParams(location.search);
+    if (params.has('autopilot')) game.autopilot = new Autopilot(def);
+    if (params.has('autopilot') || params.has('debug')) (window as unknown as { __wjGame?: Game }).__wjGame = game;
     this.game = game;
     this.current = def;
     this.buildHud(def);
