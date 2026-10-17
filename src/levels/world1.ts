@@ -1,5 +1,5 @@
 import type { LevelDef, Piece, Vec3 } from '../level/types';
-import { arc, route, topCentre } from './build';
+import { arc, decorate, route, topCentre } from './build';
 
 const ISLAND = 'block-grass-overhang-large';
 const TOWER = 'block-grass-large-tall';
@@ -31,6 +31,8 @@ const r11 = route(
   TOWER,
 );
 
+const pedestal11 = decorate('block-grass', r11, 10);
+
 const firstSteps: LevelDef = {
   id: '1-1',
   name: { it: 'Primi passi', en: 'First steps' },
@@ -44,19 +46,19 @@ const firstSteps: LevelDef = {
     // Side islands with gems, a short detour from the route.
     { model: 'block-grass-overhang-low', at: add(r11[3]!.at, [3.2, 0.3, 0]) },
     { model: 'block-grass-overhang-low', at: add(r11[7]!.at, [-3, 0.6, 0]) },
-    { model: 'block-grass', at: add(r11[10]!.at, [0.6, 1, -0.6]) },
-    // Scenery on the islands.
-    { model: 'tree', at: add(r11[2]!.at, [0.6, 1, 0.6]) },
-    { model: 'flowers', at: add(r11[4]!.at, [-0.5, 1, 0.4]) },
-    { model: 'tree-pine', at: add(r11[6]!.at, [0.7, 1, 0.7]) },
-    { model: 'grass', at: add(r11[8]!.at, [0.6, 1, -0.6]) },
-    { model: 'rocks', at: add(r11[9]!.at, [-0.6, 1, 0.6]) },
+    pedestal11,
+    // Scenery on the islands, out of the way of the jumps.
+    decorate('tree', r11, 2),
+    decorate('flowers', r11, 4),
+    decorate('tree-pine', r11, 6),
+    decorate('grass', r11, 8),
+    decorate('rocks', r11, 9),
   ],
   coins: arcs(r11, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]),
   gems: [
     topCentre({ model: 'block-grass-overhang-low', at: add(r11[3]!.at, [3.2, 0.3, 0]) }, 0.3),
     topCentre({ model: 'block-grass-overhang-low', at: add(r11[7]!.at, [-3, 0.6, 0]) }, 0.3),
-    topCentre({ model: 'block-grass', at: add(r11[10]!.at, [0.6, 1, -0.6]) }, 0.3),
+    topCentre(pedestal11, 0.3),
   ],
   checkpoints: [topCentre(r11[5]!)],
   killY: -8,
@@ -89,8 +91,9 @@ const movingBridges: LevelDef = {
     ...r12b,
     ...r12c,
     ...r12d,
-    { model: 'tree', at: add(r12b[1]!.at, [0.6, 1, 0.6]) },
-    { model: 'flowers', at: add(r12c[1]!.at, [-0.5, 1, -0.5]) },
+    // Neighbours of these islands include the ferry and the lift, not just route pieces.
+    decorate('tree', r12b, 1, [[2.5, 6.3, 16.3]]),
+    decorate('flowers', r12c, 1, [[9.6, 7.8, 22.7]]),
     { model: 'block-grass-overhang-low', at: add(r12c[0]!.at, [3.2, 1, 0]) },
   ],
   movers: [
@@ -134,6 +137,8 @@ const r13 = route(
   TOWER,
 );
 
+const pedestal13 = decorate('block-grass', r13, 7);
+
 const turboAndJetpack: LevelDef = {
   id: '1-3',
   name: { it: 'Turbo e jetpack', en: 'Turbo and jetpack' },
@@ -144,17 +149,17 @@ const turboAndJetpack: LevelDef = {
   abilities: { dashes: 2, fuel: 1.5, magic: 1 },
   pieces: [
     ...r13,
-    { model: 'tree-pine', at: add(r13[3]!.at, [-0.6, 1, 0.6]) },
-    { model: 'sign', at: add(r13[1]!.at, [0.7, 1, 0.8]) },
+    decorate('tree-pine', r13, 3),
+    decorate('sign', r13, 1),
     { model: 'block-grass-overhang-low', at: add(r13[2]!.at, [3.6, 0.3, 0]) },
-    { model: 'block-grass', at: add(r13[7]!.at, [0.6, 1, -0.6]) },
-    { model: 'flowers', at: add(r13[5]!.at, [0.5, 1, 0.5]) },
+    pedestal13,
+    decorate('flowers', r13, 5),
   ],
   coins: [...arc(r13[1]!, r13[2]!, 5, 0.6), ...arcs(r13, [2, 5, 6])],
   gems: [
     add(topCentre(r13[4]!), [0, 1.5, 0]),
     topCentre({ model: 'block-grass-overhang-low', at: add(r13[2]!.at, [3.6, 0.3, 0]) }, 0.3),
-    topCentre({ model: 'block-grass', at: add(r13[7]!.at, [0.6, 1, -0.6]) }, 0.3),
+    topCentre(pedestal13, 0.3),
   ],
   checkpoints: [topCentre(r13[3]!)],
   killY: -8,

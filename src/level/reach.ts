@@ -156,3 +156,40 @@ export function checkGems(level: LevelDef): string[] {
   });
   return problems;
 }
+
+/** Distance from point (px, pz) to the segment a-b in the ground plane. */
+function segmentDistance(px: number, pz: number, ax: number, az: number, bx: number, bz: number): number {
+  const dx = bx - ax;
+  const dz = bz - az;
+  const len2 = dx * dx + dz * dz;
+  const t = len2 === 0 ? 0 : Math.max(0, Math.min(1, ((px - ax) * dx + (pz - az) * dz) / len2));
+  return Math.hypot(px - (ax + t * dx), pz - (az + t * dz));
+}
+
+/**
+ * Scenery must not stand in the way between consecutive route stops: walking straight
+ * from one landing spot to the next never bumps into a tree or a pedestal.
+ */
+export function checkClearPath(level: LevelDef): string[] {
+  const stops = [
+    ...level.pieces.filter((p) => p.route !== undefined).map((p) => ({ order: p.route!, t: topOf(p.model, p.at, p.turns) })),
+    ...(level.movers ?? []).filter((m) => m.route !== undefined).map((m) => ({ order: m.route!, t: topOf(m.model, m.from) })),
+  ].sort((a, b) => a.order - b.order);
+  const blockers = level.pieces.filter((p) => p.route === undefined && !NON_SOLID.has(p.model));
+  const problems: string[] = [];
+  for (let i = 1; i < stops.length; i++) {
+    const a = stops[i - 1]!.t;
+    const b = stops[i]!.t;
+    const [ax, az, bx, bz] = [(a.minX + a.maxX) / 2, (a.minZ + a.maxZ) / 2, (b.minX + b.maxX) / 2, (b.minZ + b.maxZ) / 2];
+    for (const p of blockers) {
+      const t = topOf(p.model, p.at, p.turns);
+      const base = p.at[1];
+      // Only things standing above the walking surface can block.
+      if (t.y <= Math.min(a.y, b.y) + 0.25 || base > Math.max(a.y, b.y) + 1.2) continue;
+      const half = Math.min(t.maxX - t.minX, t.maxZ - t.minZ) / 2;
+      const d = segmentDistance((t.minX + t.maxX) / 2, (t.minZ + t.maxZ) / 2, ax, az, bx, bz);
+      if (d < half + 0.25) problems.push(`${p.model} blocks the way from stop ${stops[i - 1]!.order} to ${stops[i]!.order}`);
+    }
+  }
+  return problems;
+}
