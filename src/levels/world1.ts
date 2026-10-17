@@ -37,7 +37,7 @@ const firstSteps: LevelDef = {
   theme: 'grass',
   spawn: topCentre(r11[0]!),
   flag: topCentre(r11[10]!),
-  medals: { gold: 16, silver: 22, bronze: 32 },
+  medals: { gold: 10.5, silver: 15, bronze: 24 },
   abilities: { dashes: 0, fuel: 0, magic: 0 },
   pieces: [
     ...r11,
@@ -82,7 +82,7 @@ const movingBridges: LevelDef = {
   theme: 'grass',
   spawn: topCentre(r12a[0]!),
   flag: topCentre(r12d[0]!),
-  medals: { gold: 20, silver: 28, bronze: 40 },
+  medals: { gold: 22, silver: 30, bronze: 45 },
   abilities: { dashes: 0, fuel: 0, magic: 0 },
   pieces: [
     ...r12a,
@@ -91,7 +91,7 @@ const movingBridges: LevelDef = {
     ...r12d,
     { model: 'tree', at: add(r12b[1]!.at, [0.6, 1, 0.6]) },
     { model: 'flowers', at: add(r12c[1]!.at, [-0.5, 1, -0.5]) },
-    { model: 'block-grass', at: add(r12c[0]!.at, [0.6, 1, 0.6]) },
+    { model: 'platform', at: add(r12c[0]!.at, [3.2, 1.3, 0]) },
   ],
   movers: [
     // Across the first gap, towards the player and back.
@@ -105,7 +105,7 @@ const movingBridges: LevelDef = {
   coins: [...arc(r12a[0]!, r12a[1]!), ...arc(r12b[0]!, r12b[1]!, 4, 1.8), ...arc(r12c[0]!, r12c[1]!)],
   gems: [
     add(topCentre(r12b[1]!), [0, 0.3, 0.6]),
-    topCentre({ model: 'block-grass', at: add(r12c[0]!.at, [0.6, 1, 0.6]) }, 0.3),
+    topCentre({ model: 'platform', at: add(r12c[0]!.at, [3.2, 1.3, 0]) }, 0.3),
     add(elevatorFoot, [0, 5.2, 0]),
   ],
   checkpoints: [topCentre(r12b[1]!)],
@@ -123,7 +123,7 @@ const r13 = route(
   ISLAND,
   [
     { d: [0, 1.5, 3.5] },
-    { d: [0, 0, 6.3], needs: 'dash' },
+    { d: [0, 0, 6.0], needs: 'dash' },
     { d: [2.5, 0.5, 2.5] },
     { d: [0, 3, 3.2], model: TOWER, needs: 'jetpack' },
     { d: [-3, 1.5, 1.5] },
@@ -140,7 +140,7 @@ const turboAndJetpack: LevelDef = {
   theme: 'grass',
   spawn: topCentre(r13[0]!),
   flag: topCentre(r13[7]!),
-  medals: { gold: 15, silver: 21, bronze: 30 },
+  medals: { gold: 9, silver: 13, bronze: 20 },
   abilities: { dashes: 2, fuel: 1.5, magic: 1 },
   pieces: [
     ...r13,

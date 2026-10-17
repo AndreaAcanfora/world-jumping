@@ -1,4 +1,4 @@
-import bounds from '../modelBounds.json';
+import bounds from '../modelBounds.json' with { type: 'json' };
 import { TUNING, apexHeight } from '../player/movement';
 import type { LevelDef, Mover, Piece, Vec3 } from './types';
 
@@ -90,7 +90,8 @@ export function checkRoute(level: LevelDef): JumpCheck[] {
         const gap = gapBetween(ta, tb);
         let limit = COMFORT * maxJumpDistance(rise);
         let maxRise = MAX_RISE * apexHeight();
-        if (b.needs === 'dash') limit += TUNING.dashSpeed * TUNING.dashTime;
+        // The dash adds its speed over running speed, for its duration.
+        if (b.needs === 'dash') limit += (TUNING.dashSpeed - TUNING.runSpeed) * TUNING.dashTime;
         if (b.needs === 'spring') {
           limit = COMFORT * maxJumpDistance(rise, TUNING.springVelocity);
           maxRise = (MAX_RISE * TUNING.springVelocity ** 2) / (2 * TUNING.gravity);

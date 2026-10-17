@@ -6,8 +6,8 @@ const DT = 1 / 60;
 const idle: MoveInput = { x: 0, z: 0, jumpPressed: false, jumpHeld: false, dashPressed: false, jetpackHeld: false };
 
 /** Simulates vertical motion only, treating y = 0 as the ground. */
-function simulate(frames: (frame: number) => Partial<MoveInput>, steps = 120) {
-  let s: MoveState = newMoveState({ dashes: 2, fuel: 1 });
+function simulate(frames: (frame: number) => Partial<MoveInput>, steps = 120, fuel = 1) {
+  let s: MoveState = newMoveState({ dashes: 2, fuel });
   let y = 0;
   let maxY = 0;
   let grounded = true;
@@ -78,7 +78,7 @@ describe('running', () => {
   });
 
   it('stops quickly with no input on the ground', () => {
-    let s = { ...newMoveState({}), vel: { x: TUNING.runSpeed, y: 0, z: 0 } };
+    let s: MoveState = { ...newMoveState({}), vel: { x: TUNING.runSpeed, y: 0, z: 0 } };
     for (let i = 0; i < 15; i++) s = stepMovement(s, idle, true, DT).state;
     expect(Math.abs(s.vel.x)).toBeLessThan(0.1);
   });
@@ -93,6 +93,20 @@ describe('abilities', () => {
     expect(s.dashes).toBe(0);
     expect(Math.hypot(s.vel.x, s.vel.z)).toBeGreaterThan(TUNING.runSpeed * 2);
     expect(stepMovement(s, { ...idle, dashPressed: true }, true, DT).events).not.toContain('dash');
+  });
+
+  it('returns to running speed when the dash ends, so its reach is predictable', () => {
+    let s = { ...newMoveState({ dashes: 1 }), facing: 0 };
+    s = stepMovement(s, { ...idle, z: 1, dashPressed: true }, false, DT).state;
+    for (let i = 0; i < 12; i++) s = stepMovement(s, { ...idle, z: 1 }, false, DT).state;
+    expect(Math.hypot(s.vel.x, s.vel.z)).toBeLessThanOrEqual(TUNING.runSpeed + 1e-9);
+  });
+
+  it('jetpack never slows down a jump that is already rising faster', () => {
+    const plain = simulate((f) => ({ jumpPressed: f === 0, jumpHeld: true })).maxY;
+    // A short burst of fuel at take-off must add height, not cap the jump.
+    const boosted = simulate((f) => ({ jumpPressed: f === 0, jumpHeld: true, jetpackHeld: true }), 120, 0.15).maxY;
+    expect(boosted).toBeGreaterThan(plain);
   });
 
   it('jetpack lifts while there is fuel, then stops', () => {

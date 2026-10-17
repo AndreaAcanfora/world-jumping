@@ -115,6 +115,14 @@ export function stepMovement(
   if (s.dashTimer > 0) {
     // A dash keeps its speed and ignores gravity for a moment.
     s.dashTimer -= dt;
+    if (s.dashTimer <= 0) {
+      // Then it ends cleanly at running speed: the extra distance is always the same.
+      const h = Math.hypot(s.vel.x, s.vel.z);
+      if (h > TUNING.runSpeed) {
+        s.vel.x *= TUNING.runSpeed / h;
+        s.vel.z *= TUNING.runSpeed / h;
+      }
+    }
     return { state: s, events };
   }
 
@@ -128,7 +136,8 @@ export function stepMovement(
   if (!grounded || s.vel.y > 0) s.vel.y = Math.max(-TUNING.maxFallSpeed, s.vel.y - TUNING.gravity * dt);
 
   if (input.jetpackHeld && s.fuel > FUEL_EPSILON) {
-    s.vel.y = Math.min(TUNING.jetpackMaxRise, s.vel.y + TUNING.jetpackAccel * dt);
+    // Thrust adds lift up to its own top speed, and never slows a faster jump.
+    if (s.vel.y < TUNING.jetpackMaxRise) s.vel.y = Math.min(TUNING.jetpackMaxRise, s.vel.y + TUNING.jetpackAccel * dt);
     s.fuel = s.fuel - dt > FUEL_EPSILON ? s.fuel - dt : 0;
     s.rising = false;
     events.push('jetpack');
