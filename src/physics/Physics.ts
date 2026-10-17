@@ -1,13 +1,20 @@
-import RAPIER from '@dimforge/rapier3d-compat';
+import type RAPIER from '@dimforge/rapier3d-compat';
 import * as THREE from 'three';
 
 export type Rapier = typeof RAPIER;
 
 let ready: Promise<Rapier> | null = null;
 
-/** Rapier ships as WebAssembly; it must be initialised once before use. */
+/**
+ * Rapier ships as WebAssembly (about 2 MB); it is loaded in its own chunk so the menu
+ * shows right away, and initialised once before use.
+ */
 export function loadRapier(): Promise<Rapier> {
-  ready ??= RAPIER.init().then(() => RAPIER);
+  ready ??= import('@dimforge/rapier3d-compat').then(async (m) => {
+    const R = m.default;
+    await R.init();
+    return R;
+  });
   return ready;
 }
 
