@@ -1,6 +1,7 @@
 name: Deploy to Altervista
 
 # Uploads the build to andreaaca.altervista.org over FTPS.
+# Altervista accepts FTP only from countries enabled in its panel: GitHub runners are in the USA.
 # While the new game is in preview it goes to /platform3D-next/; set DEPLOY_DIR to
 # /platform3D/ (repository variable) when it replaces the classic version.
 on:
@@ -36,12 +37,9 @@ jobs:
           cache: npm
       - run: npm ci && npm run build
         if: steps.creds.outputs.ok == 'true'
-      - uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+      - name: Upload over FTPS (resumes, index.html last)
         if: steps.creds.outputs.ok == 'true'
-        with:
-          server: ftp.andreaaca.altervista.org
-          username: ${{ vars.ALTERVISTA_FTP_USER || 'andreaaca' }}
-          password: ${{ secrets.ALTERVISTA_FTP_PASSWORD }}
-          protocol: ftps
-          local-dir: dist/
-          server-dir: ${{ vars.DEPLOY_DIR || '/platform3D-next/' }}
+        run: node scripts/deploy-ftp.mjs "${{ vars.DEPLOY_DIR || '/platform3D-next/' }}"
+        env:
+          ALTERVISTA_FTP_PASSWORD: ${{ secrets.ALTERVISTA_FTP_PASSWORD }}
+          ALTERVISTA_FTP_USER: ${{ vars.ALTERVISTA_FTP_USER || 'andreaaca' }}
