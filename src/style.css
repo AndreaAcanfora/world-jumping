@@ -74,10 +74,12 @@ a:focus-visible {
 
 /* The title screens sit on a sky with drifting clouds instead of the game. */
 #screen.title-bg {
+  /* Fixed-width cloud images keep their shape on any screen size. */
   background:
-    radial-gradient(ellipse 30% 9% at 18% 22%, #fff 60%, transparent 62%),
-    radial-gradient(ellipse 22% 7% at 80% 14%, #fff 60%, transparent 62%),
-    radial-gradient(ellipse 26% 8% at 70% 78%, rgba(255, 255, 255, 0.85) 60%, transparent 62%),
+    url('/cloud.svg') no-repeat 6% 14% / clamp(150px, 22vw, 300px) auto,
+    url('/cloud.svg') no-repeat 92% 8% / clamp(110px, 15vw, 210px) auto,
+    url('/cloud.svg') no-repeat 84% 86% / clamp(130px, 19vw, 260px) auto,
+    url('/cloud.svg') no-repeat 12% 92% / clamp(90px, 12vw, 170px) auto,
     linear-gradient(var(--sky) 0%, var(--sky-light) 100%);
   backdrop-filter: none;
 }
