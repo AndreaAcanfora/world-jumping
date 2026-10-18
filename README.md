@@ -2,7 +2,7 @@
 
 A 3D platformer in the browser: run and jump from island to island up to the flag. Works on desktop and phones, free and open source.
 
-**Play:** https://andreaacanfora.github.io/world-jumping/ (preview) · https://andreaaca.altervista.org/platform3D/
+**Play:** https://andreaaca.altervista.org/platform3D/ (preview builds: https://andreaacanfora.github.io/world-jumping/)
 
 ![Gameplay](docs/gameplay.png)
 
@@ -66,9 +66,22 @@ src/ui/                  menus, HUD, Italian and English
 src/debug/Autopilot.ts   plays a level for the tests
 ```
 
+## Website
+
+`site/` holds what runs on andreaaca.altervista.org around the game:
+
+- `landing/page.php`: the landing page in 11 languages (one URL each, kept from 2018 for search ranking), with `VideoGame` and `FAQPage` structured data and the 2018 hall of fame;
+- `landing/i18n/`: the landing texts;
+- `platform3D-classic/`: the original 2018 game, with a safe score endpoint;
+- `sitemap.xml`, `img/`.
+
+`landing/preview.php?lang=xx` shows the landing in any language without indexing.
+
 ## Deployment
 
-GitHub Actions run the tests on every push, publish a preview on GitHub Pages and upload the build to Altervista over FTPS (`.github/workflows/altervista.yml`, needs the `ALTERVISTA_FTP_PASSWORD` secret).
+GitHub Actions run the tests on every push, publish a preview on GitHub Pages and upload the game to `/platform3D/` on Altervista over FTPS (`.github/workflows/altervista.yml`, needs the `ALTERVISTA_FTP_PASSWORD` secret). Altervista accepts FTP only from the countries enabled in its panel.
+
+By hand: `node scripts/deploy-ftp.mjs dist /platform3D/` or `node scripts/deploy-ftp.mjs site /` (resumable, never deletes files).
 
 ## Support
 

@@ -2,8 +2,7 @@ name: Deploy to Altervista
 
 # Uploads the build to andreaaca.altervista.org over FTPS.
 # Altervista accepts FTP only from countries enabled in its panel: GitHub runners are in the USA.
-# While the new game is in preview it goes to /platform3D-next/; set DEPLOY_DIR to
-# /platform3D/ (repository variable) when it replaces the classic version.
+# The game goes to /platform3D/ (the classic 2018 version lives in /platform3D-classic/).
 on:
   push:
     branches: [main]
@@ -39,7 +38,7 @@ jobs:
         if: steps.creds.outputs.ok == 'true'
       - name: Upload over FTPS (resumes, index.html last)
         if: steps.creds.outputs.ok == 'true'
-        run: node scripts/deploy-ftp.mjs "${{ vars.DEPLOY_DIR || '/platform3D-next/' }}"
+        run: node scripts/deploy-ftp.mjs dist "${{ vars.DEPLOY_DIR || '/platform3D/' }}"
         env:
           ALTERVISTA_FTP_PASSWORD: ${{ secrets.ALTERVISTA_FTP_PASSWORD }}
           ALTERVISTA_FTP_USER: ${{ vars.ALTERVISTA_FTP_USER || 'andreaaca' }}

@@ -1,14 +1,19 @@
-// Uploads dist/ to Altervista over FTPS, one file at a time, resuming where it stopped.
-//   ALTERVISTA_FTP_PASSWORD=... node scripts/deploy-ftp.mjs [/platform3D-next/]
+// Uploads a local folder to Altervista over FTPS, one file at a time, resuming where it
+// stopped. It never deletes anything on the server.
+//   ALTERVISTA_FTP_PASSWORD=... node scripts/deploy-ftp.mjs dist /platform3D/
+//   ALTERVISTA_FTP_PASSWORD=... node scripts/deploy-ftp.mjs site /
 // Altervista only accepts FTP from the countries enabled in its control panel.
 import { readdirSync, statSync } from 'node:fs';
 import { join, posix, relative } from 'node:path';
 import { Client } from 'basic-ftp';
 
-const dir = process.argv[2] ?? process.env.DEPLOY_DIR ?? '/platform3D-next/';
+const source = process.argv[2] ?? 'dist';
+const dir = process.argv[3] ?? process.env.DEPLOY_DIR ?? '/platform3D-next/';
 const password = process.env.ALTERVISTA_FTP_PASSWORD;
 if (!password) throw new Error('set ALTERVISTA_FTP_PASSWORD');
-if (!dir.startsWith('/platform3D')) throw new Error(`refusing to deploy to ${dir}`);
+// Only these targets: the game build into its folders, the site files into the root.
+const allowed = { dist: ['/platform3D/', '/platform3D-next/'], site: ['/'], 'site/platform3D-classic': ['/platform3D-classic/'], 'site/landing': ['/landing/'], 'site/img': ['/img/'] };
+if (!allowed[source]?.includes(dir)) throw new Error(`refusing to deploy ${source} to ${dir}`);
 
 function files(root, base = root) {
   return readdirSync(root).flatMap((name) => {
@@ -31,12 +36,12 @@ async function connect() {
 }
 
 // index.html last, so visitors never get a page that points at files not uploaded yet.
-const list = files('dist').sort((a, b) => (a === 'index.html') - (b === 'index.html'));
+const list = files(source).sort((a, b) => (a === 'index.html') - (b === 'index.html'));
 let uploaded = 0;
 let skipped = 0;
 await connect();
 for (const file of list) {
-  const local = join('dist', file);
+  const local = join(source, file);
   const remote = posix.join(dir, file.split('\\').join('/'));
   const size = statSync(local).size;
   for (let attempt = 1; ; attempt++) {
@@ -48,7 +53,11 @@ for (const file of list) {
       }
       await client.ensureDir(posix.dirname(remote));
       await client.cd('/');
-      await client.uploadFrom(local, remote);
+      // A stalled data connection can hang without an error: give each file 90 s.
+      await Promise.race([
+        client.uploadFrom(local, remote),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('upload timed out')), 90_000)),
+      ]);
       uploaded++;
       console.log(`up ${file} (${(size / 1024).toFixed(0)} kB)`);
       break;
