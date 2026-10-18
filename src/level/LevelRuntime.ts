@@ -2,11 +2,9 @@ import * as THREE from 'three';
 import type RAPIER from '@dimforge/rapier3d-compat';
 import { instance } from '../assets/models';
 import type { Physics } from '../physics/Physics';
-import { boundsOf } from './reach';
-import type { LevelDef, Mover, Vec3 } from './types';
+import { NON_SOLID, boundsOf } from './reach';
+import type { LevelDef, Mover, Piece, Vec3 } from './types';
 
-/** Scenery the player walks through. */
-const NON_SOLID = new Set(['flowers', 'flowers-tall', 'grass', 'mushrooms', 'plant', 'stones']);
 
 const v3 = (a: Vec3) => new THREE.Vector3(a[0], a[1], a[2]);
 
@@ -51,6 +49,27 @@ export class LevelRuntime {
     return level;
   }
 
+  private readonly boxMaterials = new Map<number, THREE.MeshStandardMaterial>();
+
+  /** Plain ground under an area: a box with its origin at the bottom centre, like Kenney models. */
+  private box(p: Piece): THREE.Object3D {
+    const [sx, sy, sz] = p.size ?? [1, 1, 1];
+    const color = p.color ?? 0xb8693a;
+    let material = this.boxMaterials.get(color);
+    if (!material) {
+      material = new THREE.MeshStandardMaterial({ color, roughness: 0.95, flatShading: true });
+      this.boxMaterials.set(color, material);
+    }
+    const geometry = new THREE.BoxGeometry(sx, sy, sz);
+    geometry.translate(0, sy / 2, 0);
+    const mesh = new THREE.Mesh(geometry, material);
+    mesh.position.set(p.at[0], p.at[1], p.at[2]);
+    mesh.receiveShadow = true;
+    mesh.castShadow = true;
+    this.group.add(mesh);
+    return mesh;
+  }
+
   private async place(model: string, at: Vec3, turns = 0, scale = 1): Promise<THREE.Object3D> {
     const { object } = await instance(model);
     object.position.set(at[0], at[1], at[2]);
@@ -64,7 +83,7 @@ export class LevelRuntime {
     const d = this.def;
     await Promise.all(
       d.pieces.map(async (p) => {
-        const object = await this.place(p.model, p.at, p.turns);
+        const object = p.model === 'box' ? this.box(p) : await this.place(p.model, p.at, p.turns);
         if (!NON_SOLID.has(p.model)) this.physics.addStaticMesh(object);
       }),
     );

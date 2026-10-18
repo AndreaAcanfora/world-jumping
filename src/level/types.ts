@@ -7,16 +7,22 @@ export interface Text {
   en: string;
 }
 
+export type Needs = 'dash' | 'jetpack' | 'spring';
+
 /** A static model placed in the level. Kenney models have their origin at the bottom centre. */
 export interface Piece {
+  /** A Kenney model name, or 'box' for plain ground (see `size` and `color`). */
   model: string;
   at: Vec3;
   /** Rotation around Y in quarter turns. */
   turns?: number;
-  /** Order along the main route; the test suite checks every jump between consecutive route pieces. */
-  route?: number;
-  /** This jump on the route is meant to need an ability. */
-  needs?: 'dash' | 'jetpack' | 'spring';
+  /** Size of a 'box' piece. */
+  size?: Vec3;
+  color?: number;
+  /** Pieces of the same area form one walkable landmass. */
+  area?: string;
+  /** Covered by another piece (earth under an area cell): never a walking surface. */
+  covered?: boolean;
 }
 
 /** A platform that travels back and forth between two points. */
@@ -28,14 +34,22 @@ export interface Mover {
   period: number;
   /** Starting offset as a fraction of the period. */
   phase?: number;
-  route?: number;
 }
+
+/**
+ * One stop of the main route. The player walks between stops in the same area and
+ * jumps between areas; the tests check every jump.
+ */
+export type Waypoint =
+  | { at: Vec3; move?: 'walk' | 'jump'; needs?: Needs }
+  | { mover: number; move?: 'jump'; needs?: Needs };
 
 export interface LevelDef {
   id: string;
   name: Text;
   theme: Theme;
-  spawn: Vec3;
+  /** Main route: the first stop is the spawn point (feet position on a surface). */
+  route: Waypoint[];
   /** Base of the goal flag; reaching it ends the level. */
   flag: Vec3;
   /** Medal thresholds in seconds. */

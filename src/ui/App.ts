@@ -88,7 +88,8 @@ export class App {
 
   private modelsOf(def: LevelDef): string[] {
     return [
-      ...def.pieces.map((p) => p.model),
+      // 'box' pieces are plain ground drawn in code, not a model file.
+      ...def.pieces.filter((p) => p.model !== 'box').map((p) => p.model),
       ...(def.movers ?? []).map((m) => m.model),
       'spring',
       'coin-gold',

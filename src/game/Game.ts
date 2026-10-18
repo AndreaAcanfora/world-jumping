@@ -6,14 +6,18 @@ import { Puffs } from '../fx/Puffs';
 import { ScreenShake } from '../fx/ScreenShake';
 import type { Input } from '../input/Input';
 import { LevelRuntime } from '../level/LevelRuntime';
-import type { LevelDef } from '../level/types';
+import type { LevelDef, Vec3 } from '../level/types';
 import { Physics, loadRapier } from '../physics/Physics';
 import { Player } from '../player/Player';
 import type { MoveInput } from '../player/movement';
 import type { Renderer } from '../render/Renderer';
 import { Environment } from '../world/Environment';
 import { Autopilot } from '../debug/Autopilot';
+import { stopPoint } from '../level/reach';
 import type { Settings } from './progress';
+
+/** The route starts where the player spawns. */
+const spawnOf = (def: LevelDef): Vec3 => stopPoint(def, def.route[0]!);
 
 export interface RunResult {
   level: LevelDef;
@@ -79,7 +83,7 @@ export class Game {
     private readonly hooks: GameHooks,
   ) {
     this.magic = def.abilities.magic;
-    this.respawnAt = new THREE.Vector3(...def.spawn);
+    this.respawnAt = new THREE.Vector3(...spawnOf(def));
     this.env = new Environment(this.scene, def.theme, def.killY + 2, highQuality);
     this.scene.add(level.group, player.visual, this.puffs.group);
     this.marker = new THREE.Mesh(
@@ -95,13 +99,13 @@ export class Game {
     const R = await loadRapier();
     const physics = new Physics(R);
     const level = await LevelRuntime.create(def, physics);
-    const spawn = new THREE.Vector3(...def.spawn);
+    const spawn = new THREE.Vector3(...spawnOf(def));
     const player = await Player.create(physics, settings.character, spawn, def.abilities);
     const rig = new CameraRig(physics, player.collider);
     rig.mode = settings.view;
     // Face the first jump.
-    const first = def.pieces.find((p) => p.route === 1);
-    const facing = first ? Math.atan2(first.at[0] - spawn.x, first.at[2] - spawn.z) : 0;
+    const next = def.route[1] ? stopPoint(def, def.route[1]) : null;
+    const facing = next ? Math.atan2(next[0] - spawn.x, next[2] - spawn.z) : 0;
     player.state = { ...player.state, facing };
     rig.snap(spawn, facing);
     renderer.attachCamera(rig.camera);
