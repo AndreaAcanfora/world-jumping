@@ -9,12 +9,15 @@ for (const level of LEVELS) {
     const errors: string[] = [];
     page.on('pageerror', (e) => errors.push(e.message));
     await page.goto(`/?autopilot`);
-    await page.evaluate((id) => {
-      // Unlock every level for the test.
-      const records: Record<string, unknown> = {};
-      for (const l of ['1-1', '1-2', '1-3']) if (l !== id) records[l] = { best: 99, gems: [false, false, false] };
-      localStorage.setItem('wj2.progress', JSON.stringify(records));
-    }, level.id);
+    await page.evaluate(
+      ({ id, ids }) => {
+        // Unlock every level for the test.
+        const records: Record<string, unknown> = {};
+        for (const l of ids) if (l !== id) records[l] = { best: 99, gems: [false, false, false] };
+        localStorage.setItem('wj2.progress', JSON.stringify(records));
+      },
+      { id: level.id, ids: LEVELS.map((l) => l.id) },
+    );
     await page.reload();
     await page.getByRole('button', { name: 'Gioca' }).click();
     await page.getByRole('button', { name: new RegExp(level.id) }).click();
