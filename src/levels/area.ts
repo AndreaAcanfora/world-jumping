@@ -29,15 +29,21 @@ export interface Area {
  *   '.'        empty
  *   '0'..'9'   flat ground, top at origin.y + digit
  *   '2N'       ramp from height 2 up to 3, climbing towards N/S/E/W
- * The first line is the far side (+z), columns grow along +x. Every cell is filled with
- * earth down to `depth` below the origin, so the area reads as one solid piece of land.
+ * The first line is the far side (+z), columns grow along +x. Higher cells are filled with
+ * earth down to the area's lowest block, so terraces read as one piece of land with nothing
+ * hanging below it.
  */
-export function area(id: string, origin: Vec3, map: string[], theme: Theme = 'grass', depth = 1.5): Area {
+export function area(id: string, origin: Vec3, map: string[], theme: Theme = 'grass'): Area {
   const rows = map.map((line) => line.trim().split(/\s+/));
   const blocks = BLOCKS[theme];
   const pieces: Piece[] = [];
   const centre = (r: number, c: number): [number, number] => [origin[0] + c * CELL, origin[2] + (rows.length - 1 - r) * CELL];
-  const bottom = origin[1] - depth;
+  const base = (token: string) => {
+    const m = /^(\d)([NSEW])?$/.exec(token);
+    if (!m) throw new Error(`area ${id}: bad cell '${token}'`);
+    return origin[1] + Number(m[1]) - (m[2] ? RAMP_FOOT : 1);
+  };
+  const bottom = Math.min(...rows.flat().filter((t) => t !== '.').map(base));
 
   rows.forEach((tokens, r) =>
     tokens.forEach((token, c) => {

@@ -36,6 +36,8 @@ export class LevelRuntime {
   readonly springs: { object: THREE.Object3D; top: THREE.Vector3; squash: number }[] = [];
   readonly checkpoints: Checkpoint[] = [];
   flag!: THREE.Object3D;
+  /** Column of light over the goal flag, so it can be found from far away. */
+  private beam!: THREE.Mesh;
   private readonly moverByHandle = new Map<number, MoverRuntime>();
 
   private constructor(
@@ -123,6 +125,13 @@ export class LevelRuntime {
       this.checkpoints.push({ object: await this.place('flag', c, 1, 1.1), position: v3(c), taken: false, index });
     }
     this.flag = await this.place('flag', d.flag, 1, 2.4);
+    const beamHeight = 40;
+    this.beam = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.35, 0.6, beamHeight, 16, 1, true),
+      new THREE.MeshBasicMaterial({ color: 0xffc83d, transparent: true, opacity: 0.45, depthWrite: false, side: THREE.DoubleSide, fog: false }),
+    );
+    this.beam.position.set(d.flag[0], d.flag[1] + beamHeight / 2, d.flag[2]);
+    this.group.add(this.beam);
   }
 
   /** Position of a moving platform at time `t` (eased back and forth). */
@@ -160,6 +169,7 @@ export class LevelRuntime {
       s.object.scale.y = 1 + s.squash * 0.8;
     }
     this.flag.rotation.y = Math.PI / 2 + Math.sin(time * 1.3) * 0.15;
+    (this.beam.material as THREE.MeshBasicMaterial).opacity = 0.4 + Math.sin(time * 2.5) * 0.12;
   }
 
   take(p: Pickup): void {

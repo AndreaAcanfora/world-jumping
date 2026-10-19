@@ -311,7 +311,7 @@ const cliff14 = area('cliff', [8, 0.6, 30], [
   '8 8 8',
   '8 8 .',
 ]);
-const ledgeTop14 = area('ledge', [17, 3.1, 30], [
+const ledgeTop14 = area('ledge', [16.5, 3.1, 30], [
   '9 9',
   '9 9',
   '. 9',
@@ -323,7 +323,7 @@ const summit14 = area('summit', [17.9, 7.1, 40.72], [
   '. 9',
 ]);
 // One step below the ledge's east side.
-const secret14 = island([22.3, 11.1, 32], 'block-grass-overhang-low');
+const secret14 = island([20.9, 11.1, 32], 'block-grass-overhang-low');
 const spring14: Vec3 = topCentre(dash14);
 
 const route14: Waypoint[] = [
@@ -376,7 +376,7 @@ const stairsInTheSky: LevelDef = {
   movers: [
     // Climbs diagonally from the meadow to the garden.
     { model: 'block-moving-large', from: [4, 1.6, 7], to: [8, 3.6, 11.5], period: 6 },
-    { model: 'block-moving-large', from: [15, 8.1, 32], to: [15, 11.1, 32], period: 5 },
+    { model: 'block-moving-large', from: [14.5, 8.1, 32], to: [14.5, 11.1, 32], period: 5 },
   ],
   springs: [spring14],
   coins: coinsFor(route14),
@@ -387,7 +387,7 @@ const stairsInTheSky: LevelDef = {
     cliff14.at(0, 0, 0.3),
     lift(topCentre(secret14), 0.3),
   ],
-  checkpoints: [garden14.at(3, 1), cliff14.at(2, 1), summit14.at(2, 1)],
+  checkpoints: [garden14.at(3, 1), cliff14.at(2, 1)],
   killY: -8,
   hint: {
     it: 'Atterra sulla molla dopo il turbo, poi prendi l\'ascensore. Tieni un po\' di jetpack per la torre.',
